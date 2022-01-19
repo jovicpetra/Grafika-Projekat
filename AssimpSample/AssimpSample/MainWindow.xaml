@@ -1,0 +1,66 @@
+﻿<Window x:Class="AssimpSample.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SharpGL WPF Application" Height="500" Width="950" 
+        xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF" KeyDown="Window_KeyDown">
+    <Grid>
+        
+        <!-- The OpenGL control provides a OpenGL drawing surface. -->
+        <sharpGL:OpenGLControl 
+            Name="openGLControl" OpenGLDraw="openGLControl_OpenGLDraw" 
+            OpenGLInitialized="openGLControl_OpenGLInitialized" Resized="openGLControl_Resized"
+            DrawFPS="True" RenderContextType="FBO" FrameRate="10" Margin="200,0,0,0"/>
+        <Label Content="Goal Height:"
+               HorizontalAlignment="Left"
+               Margin="5,10,0,0" 
+               VerticalAlignment="Top"
+               Width="80"/>
+        <ComboBox Name="goalHeightCombo"
+                  HorizontalAlignment="Left"
+                  Margin="90,10,0,0"
+                  VerticalAlignment="Top" 
+                  Width="100"
+                  ItemsSource="{Binding Path=GoalHeight}" 
+                  SelectedItem="{Binding Mode=TwoWay, Path=GoalHeight}"
+                  SelectionChanged="goalHeightCombo_SelectionChanged"
+                  />
+        <Label Content="Ball Size:"
+               HorizontalAlignment="Left"
+               Margin="5,50,0,100" 
+               VerticalAlignment="Top"
+               Width="80"/>
+        <ComboBox Name="ballSizeCombo"
+                  HorizontalAlignment="Left"
+                  Margin="90,50,0,100"
+                  VerticalAlignment="Top" 
+                  Width="100"
+                  ItemsSource="{Binding Path=BallSize}" 
+                  SelectedItem="{Binding Mode=TwoWay, Path=BallSize}"
+                  SelectionChanged="ballSizeCombo_SelectionChanged"
+                  />
+        <Label Content="Speed:"
+               HorizontalAlignment="Left"
+               Margin="5,90,0,100" 
+               VerticalAlignment="Top"
+               Width="80"/>
+        <ComboBox Name="speedCombo"
+                  HorizontalAlignment="Left"
+                  Margin="90,90,0,100"
+                  VerticalAlignment="Top" 
+                  Width="100"
+                  ItemsSource="{Binding Path=SpeedOfRotation}" 
+                  SelectedItem="{Binding Mode=TwoWay, Path=SpeedOfRotation}"
+                  SelectionChanged="speedCombo_SelectionChanged"
+                  />
+        <Button Name="kickButton" HorizontalAlignment="Left"
+                  Margin="50,150,0,100"
+                  VerticalAlignment="Top" 
+                  Click="kickButton_Click"
+                  Width="100">Kick</Button>
+        <Button Name="startPositionButton" HorizontalAlignment="Left"
+                  Margin="50,200,0,100"
+                  VerticalAlignment="Top" 
+                  Click="startPositionButton_Click"
+                  Width="100">Restart</Button>
+    </Grid>
+</Window>
