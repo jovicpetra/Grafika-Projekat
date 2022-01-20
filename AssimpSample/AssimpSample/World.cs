@@ -15,6 +15,8 @@ using SharpGL.SceneGraph.Quadrics;
 using SharpGL.SceneGraph.Core;
 using SharpGL;
 using System.Windows.Threading;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace AssimpSample
 {
@@ -70,7 +72,11 @@ namespace AssimpSample
         private DispatcherTimer timer1;
         private DispatcherTimer timer2;
         private DispatcherTimer timer3;
-        
+        private enum TextureObjects { Grass = 0, WhitePlastic };
+        private readonly int m_textureCount = Enum.GetNames(typeof(TextureObjects)).Length;
+        private uint[] m_textures = null;
+        private string[] m_textureFiles = { "..//..//images//grass.jpg", "..//..//images//whiteplastic.jpg" };
+
         #endregion Atributi
 
         #region Properties
@@ -237,6 +243,8 @@ namespace AssimpSample
             gl.Enable(OpenGL.GL_LIGHTING);
             gl.Enable(OpenGL.GL_NORMALIZE);
 
+            InitializeTexture(gl);
+
             timer1 = new DispatcherTimer();
             timer1.Interval = TimeSpan.FromMilliseconds(5);
             timer1.Tick += new EventHandler(MoveBall);
@@ -346,14 +354,24 @@ namespace AssimpSample
 
         private void DrawBase(OpenGL gl)
         {
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[(int)TextureObjects.Grass]);
             gl.PushMatrix();
+            gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_MODULATE);
+            gl.MatrixMode(OpenGL.GL_TEXTURE);
+            gl.LoadIdentity();
+            gl.Scale(2, 2, 2);
+            gl.MatrixMode(OpenGL.GL_MODELVIEW);
             gl.Begin(OpenGL.GL_QUADS);
             gl.Color(0.0f, 0.3f, 0.0f);
             gl.Normal(FindFaceNormal(8000.0f, -2000.0f, -m_sceneDistance, -8000.0f, -2000.0f, -m_sceneDistance,
                -8000.0f, -5000.0f, m_sceneDistance));
+            gl.TexCoord(1.0f, 1.0f);
             gl.Vertex(8000.0f, -2000.0f, -m_sceneDistance);
+            gl.TexCoord(1.0f, 0.0f);
             gl.Vertex(-8000.0f, -2000.0f, -m_sceneDistance);
+            gl.TexCoord(0.0f, 0.0f);
             gl.Vertex(-8000.0f, -5000.0f, m_sceneDistance);
+            gl.TexCoord(0.0f, 1.0f);
             gl.Vertex(8000.0f, -5000.0f, m_sceneDistance);
             gl.End();
             gl.PopMatrix();
@@ -362,12 +380,15 @@ namespace AssimpSample
         private void DrawGoal(OpenGL gl)
         {
             // sredina
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[(int)TextureObjects.WhitePlastic]);
             gl.PushMatrix();
+            gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_MODULATE);
             gl.Color(0.5, 0.5, 0.5);
             cylinder.CreateInContext(gl);
             cylinder.Height = 4500;
             cylinder.TopRadius = 100f;
             cylinder.BaseRadius = 100f;
+            cylinder.TextureCoords = true;
             cylinder.NormalGeneration = Normals.Smooth;
             cylinder.NormalOrientation = Orientation.Outside;
             gl.Translate(0.0f, GoalHeight - 8500f, -m_sceneDistance);
@@ -376,11 +397,14 @@ namespace AssimpSample
             gl.PopMatrix();
 
             // horizontalna
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[(int)TextureObjects.WhitePlastic]);
             gl.PushMatrix();
+            gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_MODULATE);
             cylinder.CreateInContext(gl);
             cylinder.Height = 5000;
             cylinder.TopRadius = 80f;
             cylinder.BaseRadius = 80f;
+            cylinder.TextureCoords = true;
             cylinder.NormalGeneration = Normals.Smooth;
             cylinder.NormalOrientation = Orientation.Outside;
             gl.Translate(2500.0f, GoalHeight - 4000f, -m_sceneDistance);
@@ -390,11 +414,14 @@ namespace AssimpSample
 
 
             // lijeva vodoravna
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[(int)TextureObjects.WhitePlastic]);
             gl.PushMatrix();
+            gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_MODULATE);
             cylinder.CreateInContext(gl);
             cylinder.Height = 6500;
             cylinder.TopRadius = 80f;
             cylinder.BaseRadius = 80f;
+            cylinder.TextureCoords = true;
             cylinder.NormalGeneration = Normals.Smooth;
             cylinder.NormalOrientation = Orientation.Outside;
             gl.Translate(-2500.0f, GoalHeight - 4000f, -m_sceneDistance);
@@ -403,11 +430,14 @@ namespace AssimpSample
             gl.PopMatrix();
 
             // desna vodoravna
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[(int)TextureObjects.WhitePlastic]);
             gl.PushMatrix();
+            gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_MODULATE);
             cylinder.CreateInContext(gl);
             cylinder.Height = 6500;
             cylinder.TopRadius = 80f;
             cylinder.BaseRadius = 80f;
+            cylinder.TextureCoords = true;
             cylinder.NormalGeneration = Normals.Smooth;
             cylinder.NormalOrientation = Orientation.Outside;
             gl.Translate(2500.0f, GoalHeight - 4000f, -m_sceneDistance);
@@ -602,6 +632,36 @@ namespace AssimpSample
             IsBallBouncing = true;
             timer1.Start();
             timer2.Start();
+        }
+
+        private void InitializeTexture(OpenGL gl)
+        {
+            m_textures = new uint[2];
+            gl.Enable(OpenGL.GL_TEXTURE_2D);
+            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, OpenGL.GL_NEAREST);
+            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAG_FILTER, OpenGL.GL_NEAREST);
+            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_S, OpenGL.GL_REPEAT);
+            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_T, OpenGL.GL_REPEAT);
+            gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_ADD);
+
+            gl.GenTextures(m_textureCount, m_textures);
+            for (int i = 0; i < m_textureCount; ++i)
+            {
+                gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[i]);
+
+                Bitmap image = new Bitmap(m_textureFiles[i]);
+                image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+                BitmapData imageData = image.LockBits(rect, ImageLockMode.ReadOnly,
+                                                      PixelFormat.Format32bppArgb);
+
+                gl.Build2DMipmaps(OpenGL.GL_TEXTURE_2D, (int)OpenGL.GL_RGBA8, image.Width, image.Height, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, imageData.Scan0);
+                gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, OpenGL.GL_LINEAR);
+                gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAG_FILTER, OpenGL.GL_LINEAR);
+
+                image.UnlockBits(imageData);
+                image.Dispose();
+            }
         }
 
         /// <summary>
